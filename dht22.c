@@ -17,6 +17,8 @@
 
 #define MAXTIMINGS 85
 static int DHTPIN = 7;
+int printtemp = 1;
+int printhumid = 1;
 static int dht22_dat[5] = {0,0,0,0,0};
 
 static uint8_t sizecvt(const int read)
@@ -26,7 +28,7 @@ static uint8_t sizecvt(const int read)
 
   if (read > 255 || read < 0)
   {
-    printf("Invalid data from wiringPi library\n");
+    fprintf(stderr, "Invalid data from wiringPi library\n");
     exit(EXIT_FAILURE);
   }
   return (uint8_t)read;
@@ -87,13 +89,20 @@ static int read_dht22_dat()
         t /= 10.0;
         if ((dht22_dat[2] & 0x80) != 0)  t *= -1;
 
+    if(printhumid != 0) {
+    	printf("%.2f", h);
+    }
 
-    printf("Humidity = %.2f %% Temperature = %.2f *C \n", h, t );
+    if(printtemp != 0) {
+    	printf("%.2f", t);
+    }
+
+    //printf("Humidity = %.2f %% Temperature = %.2f *C \n", h, t );
     return 1;
   }
   else
   {
-    printf("Data not good, skip\n");
+    fprintf(stderr, "Data not good, skip\n");
     return 0;
   }
 }
@@ -101,14 +110,34 @@ static int read_dht22_dat()
 int main (int argc, char *argv[])
 {
   int lockfd;
+  char c;
+  while ((c = getopt (argc, argv, "tmp:")) != -1)
+  	switch (c)
+  {
+  	case 't':
+  		printhumid = 0;
+  		break;
+  	case 'm':
+  		printtemp = 0;
+  		break;
+  	case 'p':
+  		DHTPIN = atoi(optarg);
+  		break;
+  	case '?':
+  		if (optopt == 'p')
+  			fprintf (stderr, "Option -%p requires port number an argument.\n", optopt);
+        else if (isprint (optopt))
+          fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+        else
+          fprintf (stderr,
+                   "Unknown option character `\\x%x'.\n",
+                   optopt);
+        return 1;
+      default:
+      	abort();
+  }
 
-  if (argc != 2)
-    printf ("usage: %s <pin>\ndescription: pin is the wiringPi pin number\nusing 7 (GPIO 4)\n",argv[0]);
-  else
-    DHTPIN = atoi(argv[1]);
-   
-
-  printf ("Raspberry Pi wiringPi DHT22 reader\nwww.lolware.net\n") ;
+  //printf ("Raspberry Pi wiringPi DHT22 reader\nwww.lolware.net\n") ;
 
   lockfd = open_lockfile(LOCKFILE);
 
