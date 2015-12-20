@@ -7,11 +7,13 @@
 
 #include <wiringPi.h>
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <sys/types.h>
 #include <unistd.h>
+
 
 #include "locking.h"
 
@@ -117,15 +119,18 @@ int main (int argc, char *argv[])
   	case 't':
   		printhumid = 0;
   		break;
+
   	case 'm':
   		printtemp = 0;
   		break;
+
   	case 'p':
   		DHTPIN = atoi(optarg);
   		break;
+
   	case '?':
   		if (optopt == 'p')
-  			fprintf (stderr, "Option -%p requires port number an argument.\n", optopt);
+  			fprintf (stderr, "Option -%c requires port number an argument.\n", optopt);
         else if (isprint (optopt))
           fprintf (stderr, "Unknown option `-%c'.\n", optopt);
         else
@@ -133,7 +138,9 @@ int main (int argc, char *argv[])
                    "Unknown option character `\\x%x'.\n",
                    optopt);
         return 1;
-      default:
+
+    default:
+        fprintf(stderr, "This should never happen.\n");
       	abort();
   }
 
