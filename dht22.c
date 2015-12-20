@@ -112,7 +112,7 @@ static int read_dht22_dat()
 int main (int argc, char *argv[])
 {
   int lockfd;
-  char c;
+  int c;
   while ((c = getopt (argc, argv, "tmp:")) != -1)
   	switch (c)
   {
