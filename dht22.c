@@ -93,6 +93,9 @@ static int read_dht22_dat()
 
     if(printhumid != 0) {
     	printf("%.2f", h);
+	if (printtemp != 0) {
+		putchar('\n');
+	}
     }
 
     if(printtemp != 0) {
@@ -111,9 +114,10 @@ static int read_dht22_dat()
 
 int main (int argc, char *argv[])
 {
-  int lockfd;
+  //int lockfd;
   int c;
-  while ((c = getopt (argc, argv, "tmp:")) != -1)
+  int retries = 10;
+  while ((c = getopt (argc, argv, "tmr:p:")) != -1)
   	switch (c)
   {
   	case 't':
@@ -123,6 +127,10 @@ int main (int argc, char *argv[])
   	case 'm':
   		printtemp = 0;
   		break;
+
+	case 'r':
+		retries = atoi(optarg);
+		break;
 
   	case 'p':
   		DHTPIN = atoi(optarg);
@@ -146,24 +154,27 @@ int main (int argc, char *argv[])
 
   //printf ("Raspberry Pi wiringPi DHT22 reader\nwww.lolware.net\n") ;
 
-  lockfd = open_lockfile(LOCKFILE);
+  //lockfd = open_lockfile(LOCKFILE);
 
   if (wiringPiSetup () == -1)
     exit(EXIT_FAILURE) ;
 	
-  if (setuid(getuid()) < 0)
-  {
-    perror("Dropping privileges failed\n");
-    exit(EXIT_FAILURE);
-  }
+  //if (setuid(getuid()) < 0)
+  //{
+  //  perror("Dropping privileges failed\n");
+  //  exit(EXIT_FAILURE);
+  //}
 
-  while (read_dht22_dat() == 0) 
+
+  int fails = 0;
+  while ((read_dht22_dat() == 0) && (fails < retries))
   {
-     delay(1000); // wait 1sec to refresh
+     delay(500); // wait 1sec to refresh
+     fails ++;
   }
 
   delay(1500);
-  close_lockfile(lockfd);
+  //close_lockfile(lockfd);
 
   return 0 ;
 }
