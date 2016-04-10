@@ -94,7 +94,7 @@ static int read_dht22_dat()
     if(printhumid != 0) {
     	printf("%.2f", h);
 	if (printtemp != 0) {
-		putchar('\n');
+		putchar(',');
 	}
     }
 
